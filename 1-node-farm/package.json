@@ -1,0 +1,20 @@
+{
+  "name": "node-farm",
+  "version": "1.0.0",
+  "description": "learning node js",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "keywords": [
+    "nodejs"
+  ],
+  "author": "Anantha Krishnan M",
+  "license": "ISC",
+  "dependencies": {
+    "slugify": "^1.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}
