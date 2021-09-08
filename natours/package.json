@@ -4,7 +4,7 @@
   "description": "Learning Nodejs & Express framework",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon server.js"
   },
   "keywords": [
     "Node.js",
