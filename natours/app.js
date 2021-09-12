@@ -9,10 +9,13 @@ const app = express();
 
 // 1) MIDDLEWARES
 //logging purpose
-app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 // by default, express won't append body to req object. Hence middleware support is needed
 app.use(express.json());
-
+//serving static files
+app.use(express.static(`${__dirname}/public`));
 //creating your own middleware
 app.use((req, res, next) => {
   console.log('😁 hello from middleware');
