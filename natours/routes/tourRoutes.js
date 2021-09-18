@@ -6,6 +6,13 @@ const router = express.Router();
 
 // defining paths
 router
+  .route('/top-5-cheap')
+  .get(tourController.top5cheapTours, tourController.getAllTours);
+
+router.route('/stats').get(tourController.getTourStats);
+
+router.route('/plan/:year').get(tourController.getTourPlan);
+router
   .route('/')
   .get(tourController.getAllTours)
   //chaining middle ware
