@@ -9,6 +9,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 const AppErrors = require('./utils/appErrors');
 const globalErrorHandler = require('./controller/errorController');
 
@@ -24,7 +25,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 const limiter = rateLimit({
-  max: 10,
+  max: 100,
   windowMs: 60 * 60 * 1000, //1hr
   message: 'Too many request sent. Please try again after 1 hr',
 });
@@ -72,6 +73,7 @@ app.use((req, res, next) => {
 // mounting routers
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 //fallback route
 app.use('*', (req, res, next) => {

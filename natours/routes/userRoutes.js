@@ -8,18 +8,20 @@ router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
-router.patch(
-  '/updateMyPassword',
-  authController.protect,
-  authController.updatePassword
-);
 
-router.patch('/updateMe', authController.protect, authController.updateMe);
-router.delete('/deleteMe', authController.protect, authController.deleteMe);
+/** use protect middleware  for below routes*/
+router.use(authController.protect);
+
+router.patch('/updateMe', authController.updateMe);
+router.delete('/deleteMe', authController.deleteMe);
 router
-  .route('/')
-  .get(authController.protect, userController.getAllUsers)
-  .post(userController.createUser);
+  .route('/me')
+  .get(authController.protect, authController.getMe, userController.getUser);
+router.route('/').get(authController.protect, userController.getAllUsers);
+router.patch('/updateMyPassword', authController.updatePassword);
+
+/** use retriction to admin  middleware  for below routes*/
+router.use(authController.restrictTo('admin'));
 router
   .route('/:id')
   .get(userController.getUser)

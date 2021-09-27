@@ -1,7 +1,12 @@
 const User = require('../models/userModel');
-const catchAsyncErrors = require('../utils/catchAsyncErrors');
+const factory = require('./handlerFactory');
 
-exports.getAllUsers = catchAsyncErrors(async (req, res) => {
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User);
+exports.updateUser = factory.updateOne(User);
+exports.deleteUser = factory.deleteOne(User);
+
+/* exports.getAllUsers = catchAsyncErrors(async (req, res) => {
   const users = await User.find();
   res.status(200).json({
     status: 'success',
@@ -10,29 +15,4 @@ exports.getAllUsers = catchAsyncErrors(async (req, res) => {
       users,
     },
   });
-});
-
-exports.createUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'route not implemented yet',
-  });
-};
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'route not implemented yet',
-  });
-};
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'route not implemented yet',
-  });
-};
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'route not implemented yet',
-  });
-};
+}); */

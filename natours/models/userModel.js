@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
 });
-
+/* 
 userSchema.pre('save', async function (next) {
   //only execute hashing if there is a modification
   if (!this.isModified('password')) return next();
@@ -65,7 +65,7 @@ userSchema.pre('save', async function (next) {
   // 1 sec hack, to prevent sharing JWT token before updating timestamp
   this.passwordChangedAt = Date.now() - 1000;
   next();
-});
+}); */
 
 userSchema.pre(/^find/, async function (next) {
   this.find({ active: { $ne: false } });

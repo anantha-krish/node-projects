@@ -239,3 +239,8 @@ exports.deleteMe = catchAsyncErrors(async (req, res, next) => {
     data: null,
   });
 });
+
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
