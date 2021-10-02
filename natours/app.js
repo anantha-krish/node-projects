@@ -6,10 +6,13 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+const cookieParser = require('cookie-parser');
 const hpp = require('hpp');
+const path = require('path');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 const AppErrors = require('./utils/appErrors');
 const globalErrorHandler = require('./controller/errorController');
 
@@ -17,8 +20,17 @@ const app = express();
 
 // 1) MIDDLEWARES
 
+//set template engine
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+//serving static files
+/* app.use(express.static(`${__dirname}/public`)); */
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Secure http headers
 app.use(helmet());
+app.use(cookieParser());
 
 //logging purpose
 if (process.env.NODE_ENV === 'development') {
@@ -34,6 +46,9 @@ app.use('/api', limiter);
 
 // by default, express won't append body to req object. Hence middleware support is needed
 app.use(express.json({ limit: '10kb' }));
+
+//for form submissions
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Prevent NOSQL injection
 app.use(mongoSanitize());
@@ -55,8 +70,6 @@ app.use(
   })
 );
 
-//serving static files
-app.use(express.static(`${__dirname}/public`));
 //creating your own middleware
 /* app.use((req, res, next) => {
   console.log('😁 hello from middleware');
@@ -70,6 +83,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/', viewRouter);
 // mounting routers
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);

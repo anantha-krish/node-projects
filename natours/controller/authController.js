@@ -76,18 +76,15 @@ exports.login = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.protect = catchAsyncErrors(async (req, res, next) => {
+  let token;
   if (
-    !(
-      req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer')
-    )
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
   ) {
-    return next(
-      new AppErrors(401, 'You are not logged in! Please login to get access.')
-    );
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
-
-  const token = req.headers.authorization.split(' ')[1];
 
   if (!token) {
     return next(
@@ -120,6 +117,36 @@ exports.protect = catchAsyncErrors(async (req, res, next) => {
 
   //Grant access
   req.user = currentUser;
+  res.locals.user = currentUser;
+  next();
+});
+
+exports.isUserLoggedIn = catchAsyncErrors(async (req, res, next) => {
+  let token;
+  if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+
+  if (!token) {
+    //don't throw any errors, just forward the request
+    return next();
+  }
+  // promisifying as verify is synchronous
+  //throws JSON Web token error and expired error
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  // check if user exists
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next();
+  }
+
+  if (currentUser.isPasswordChangedAfterTokenIssue(decoded.iat)) {
+    return next();
+  }
+
+  //Store user in response local
+  res.locals.user = currentUser;
   next();
 });
 
@@ -243,4 +270,13 @@ exports.deleteMe = catchAsyncErrors(async (req, res, next) => {
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
   next();
+};
+
+exports.logout = (req, res, next) => {
+  /** we cant delete a cooie, instead we send a invalid cookie */
+  res.cookie('jwt', 'loggedOut', {
+    expires: new Date(Date.now() + 10000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
 };
