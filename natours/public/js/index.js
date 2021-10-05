@@ -2,12 +2,13 @@
 import '@babel/polyfill';
 import { login, updateSettings, logout } from './login';
 import { loadMap } from './mapBox';
-
+import { bookTour } from './stripe';
 const map = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
 const logoutBtn = document.querySelector('.nav__el--logout');
 const saveUserForm = document.querySelector('.form-user-data');
 const updatePasswordForm = document.querySelector('.form-user-settings');
+const bookTourBtn = document.getElementById('book-tour');
 if (map) {
   const locations = JSON.parse(
     document.getElementById('map').dataset.locations
@@ -31,9 +32,12 @@ if (logoutBtn) logoutBtn.addEventListener('click', logout);
 if (saveUserForm) {
   saveUserForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    const email = document.getElementById('email').value;
-    const name = document.getElementById('name').value;
-    updateSettings({ email, name }, 'data');
+    const form = new FormData();
+    form.append('email', document.getElementById('email').value);
+    form.append('name', document.getElementById('name').value);
+    //handling file
+    form.append('photo', document.getElementById('photo').files[0]);
+    updateSettings(form, 'data');
   });
 }
 
@@ -54,5 +58,13 @@ if (updatePasswordForm) {
     document.getElementById('password-confirm').value = '';
     document.querySelector('.btn-change-password').textContent =
       'Save Password';
+  });
+}
+
+if (bookTourBtn) {
+  bookTourBtn.addEventListener('click', (e) => {
+    e.target.textContent = 'Processing ...';
+    const { tourId } = e.target.dataset;
+    bookTour(tourId);
   });
 }

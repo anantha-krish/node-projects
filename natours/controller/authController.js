@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const User = require('../models/userModel');
 const catchAsyncErrors = require('../utils/catchAsyncErrors');
 const AppErrors = require('../utils/appErrors');
-const sendMail = require('../utils/email');
+const Email = require('../utils/email');
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -37,16 +37,6 @@ const createandSendToken = (user, statusCode, res) => {
   });
 };
 
-const filterObj = (obj, ...alllowedFields) => {
-  const newObj = {};
-  Object.keys(obj).forEach((el) => {
-    if (alllowedFields.includes(el)) {
-      newObj[el] = obj[el];
-    }
-  });
-
-  return newObj;
-};
 exports.signup = catchAsyncErrors(async (req, res, next) => {
   //const newUser = await User.create(req.body); security flaw can send anything
   const newUser = await User.create({
@@ -54,9 +44,11 @@ exports.signup = catchAsyncErrors(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
-    passwordChangedAt: req.body.passwordChangedAt || new Date(),
+    passwordChangedAt: req.body.passwordChangedAt,
     role: req.body.role,
   });
+  const url = `${req.protocol}://${req.get('host')}/account`;
+  await new Email(newUser, url).sendWelcome();
   //JWT
   createandSendToken(newUser, 201, res);
 });
@@ -172,17 +164,18 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
   const resetToken = user.createPasswordResetToken();
   //require to ignore validation while saving
   await user.save({ validateBeforeSave: false });
-  const resetURL = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1//users/resetPassword/${resetToken}`;
 
-  const message = `Forgot your password? Submit a patch request with your new password and passswordCofirm to :${resetURL}\n. Please ignore if already done`;
   try {
-    await sendMail({
+    /*   await sendMail({
       email: user.email,
       subject: 'Reset your Password (valid for next 10 mins) ',
       message,
-    });
+    }); */
+    const resetURL = `${req.protocol}://${req.get(
+      'host'
+    )}/api/v1/users/resetPassword/${resetToken}`;
+    console.log(resetToken);
+    await new Email(user, resetURL).sendResetPassword();
 
     res.status(200).json({
       status: 'success',
@@ -202,6 +195,7 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
     .createHash('sha256')
     .update(req.params.token)
     .digest('hex');
+
   const user = await User.findOne({
     passwordResetToken: hashedToken,
     passwordResetExpires: { $gt: Date.now() },
@@ -232,45 +226,6 @@ exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
   await user.save();
   createandSendToken(user, 200, res);
 });
-
-exports.updateMe = catchAsyncErrors(async (req, res, next) => {
-  if (req.body.password || req.body.passwordConfirm) {
-    return next(
-      new AppErrors(
-        400,
-        "You can't update password here, please use /userr/updateMyPassword."
-      )
-    );
-  }
-  //below logic allows to filter out neccessary items to be updated
-  // thus they can't directly change password and role
-  const filteredBody = filterObj(req.body, 'name', 'email');
-  const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
-    new: true,
-    runValidators: true,
-  });
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      user: updatedUser,
-    },
-  });
-});
-
-exports.deleteMe = catchAsyncErrors(async (req, res, next) => {
-  //soft delete only making flag as false
-  await User.findByIdAndUpdate(req.user._id, { active: false });
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
-
-exports.getMe = (req, res, next) => {
-  req.params.id = req.user.id;
-  next();
-};
 
 exports.logout = (req, res, next) => {
   /** we cant delete a cooie, instead we send a invalid cookie */

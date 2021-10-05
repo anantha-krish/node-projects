@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     //custom validators
     validate: [validator.isEmail, 'Please enter a valid email'],
   },
-  photo: String,
+  photo: { type: String, default: 'default.jpg' },
   password: {
     type: String,
     required: [true, 'Please provide a password'],
@@ -49,6 +49,7 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
 });
+
 userSchema.pre('save', async function (next) {
   //only execute hashing if there is a modification
   if (!this.isModified('password')) return next();
@@ -65,6 +66,7 @@ userSchema.pre('save', async function (next) {
   this.passwordChangedAt = Date.now() - 1000;
   next();
 });
+
 userSchema.pre(/^find/, async function (next) {
   this.find({ active: { $ne: false } });
   next();

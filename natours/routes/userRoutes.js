@@ -13,11 +13,16 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 /** use protect middleware  for below routes*/
 router.use(authController.protect);
 
-router.patch('/updateMe', authController.updateMe);
-router.delete('/deleteMe', authController.deleteMe);
+router.patch(
+  '/updateMe',
+  userController.uploadPhotoHandler,
+  userController.resizePhotoHandler,
+  userController.updateMe
+);
+router.delete('/deleteMe', userController.deleteMe);
 router
   .route('/me')
-  .get(authController.protect, authController.getMe, userController.getUser);
+  .get(authController.protect, userController.getMe, userController.getUser);
 router.route('/').get(authController.protect, userController.getAllUsers);
 router.patch('/updateMyPassword', authController.updatePassword);
 

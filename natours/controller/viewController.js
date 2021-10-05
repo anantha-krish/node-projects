@@ -2,6 +2,7 @@ const catchAsyncErrors = require('../utils/catchAsyncErrors');
 const Tours = require('../models/tourModel');
 const AppErrors = require('../utils/appErrors');
 const User = require('../models/userModel');
+const Booking = require('../models/bookingModel');
 
 exports.getOverview = catchAsyncErrors(async (req, res, next) => {
   const tours = await Tours.find();
@@ -26,7 +27,7 @@ exports.getTour = catchAsyncErrors(async (req, res, next) => {
     .status(200)
     .set(
       'Content-Security-Policy',
-      'connect-src http://localhost:3000/api/v1/users/logout https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com'
+      'connect-src http://localhost:3000/api/v1/ https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com'
     )
     .render('tour', {
       title: `${tour.name}`,
@@ -62,4 +63,13 @@ exports.updateUserDetails = catchAsyncErrors(async (req, res, next) => {
   );
 
   res.status(200).render('account', { user: updatedUser });
+});
+
+exports.getMyBookings = catchAsyncErrors(async (req, res, next) => {
+  const myTours = await Booking.find({ user: req.user.id });
+
+  const tourIds = myTours.map((el) => el.tour);
+  const tours = await Tours.find({ _id: { $in: tourIds } });
+
+  res.status(200).render('overview', { tours });
 });

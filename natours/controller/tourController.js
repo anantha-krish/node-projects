@@ -1,8 +1,54 @@
+const multer = require('multer');
+const sharp = require('sharp');
 const Tours = require('../models/tourModel');
 const AppErrors = require('../utils/appErrors');
 
 const catchAsyncErrors = require('../utils/catchAsyncErrors');
 const factory = require('./handlerFactory');
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, callback) => {
+  if (file.mimetype.startsWith('image')) {
+    return callback(null, true);
+  }
+  return callback(new AppErrors(400, 'Please upload an image file'), false);
+};
+const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+/* 
+ use this when you need only one field
+ exports.uploadTourImages = upload.array('images', 3); */
+
+exports.uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 },
+]);
+
+exports.resizeTourImages = async (req, res, next) => {
+  if (!req.files.imageCover || !req.files.images) return next();
+  /** Cover Image Processing */
+  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${req.body.imageCover}`);
+
+  /** Tour Images Processing */
+  req.body.images = [];
+  await Promise.all(
+    req.files.images.map(async (image, i) => {
+      const fileName = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+      await sharp(image.buffer)
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/tours/${fileName}`);
+      req.body.images.push(fileName);
+    })
+  );
+  next();
+};
 
 exports.top5cheapTours = catchAsyncErrors(async (req, res, next) => {
   req.query.sort = '-ratingsAverage,price';
