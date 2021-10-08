@@ -9,6 +9,7 @@ const xss = require('xss-clean');
 const cookieParser = require('cookie-parser');
 const hpp = require('hpp');
 const path = require('path');
+const compression = require('compression');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
@@ -54,6 +55,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(mongoSanitize());
 //Prevent XSS
 app.use(xss());
+app.use(compression());
 
 //Prevent Parameter pollution (Duplicate Param query)
 app.use(

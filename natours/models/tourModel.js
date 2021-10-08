@@ -170,10 +170,6 @@ toursSchema.pre(/^find/, function (next) {
   next();
 });
 
-toursSchema.post(/^find/, function (docs, next) {
-  console.log(`query took ${Date.now() - this.start} ms to execute`);
-  next();
-});
 //commented to support geo aggregation
 /* toursSchema.pre('aggregate', function (next) {
   // pipeline() will return the array of stages

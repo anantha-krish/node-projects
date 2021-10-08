@@ -8808,7 +8808,8 @@ var login = /*#__PURE__*/function () {
             _context.next = 3;
             return (0, _axios.default)({
               method: 'POST',
-              url: 'http://localhost:3000/api/v1/users/login',
+              // url: '/api/v1/users/login',
+              url: '/api/v1/users/login',
               data: {
                 email: email,
                 password: password
@@ -8859,7 +8860,7 @@ var logout = /*#__PURE__*/function () {
             _context2.next = 3;
             return (0, _axios.default)({
               method: 'GET',
-              url: 'http://localhost:3000/api/v1/users/logout'
+              url: '/api/v1/users/logout'
             });
 
           case 3:
@@ -8900,7 +8901,7 @@ var updateSettings = /*#__PURE__*/function () {
         switch (_context3.prev = _context3.next) {
           case 0:
             _context3.prev = 0;
-            baseUrl = 'http://localhost:3000/api/v1/users';
+            baseUrl = '/api/v1/users';
             url = "".concat(baseUrl).concat(type === 'password' ? '/updateMyPassword' : '/updateMe');
             _context3.next = 5;
             return (0, _axios.default)({
@@ -9006,7 +9007,7 @@ exports.bookTour = /*#__PURE__*/function () {
             _context.next = 3;
             return (0, _axios.default)({
               method: 'GET',
-              url: "http://localhost:3000/api/v1/bookings/checkout-session/".concat(tourId)
+              url: "/api/v1/bookings/checkout-session/".concat(tourId)
             });
 
           case 3:
@@ -9363,25 +9364,20 @@ if (updatePasswordForm) {
               passwordCurrent = document.getElementById('password-current').value;
               password = document.getElementById('password').value;
               passwordConfirm = document.getElementById('password-confirm').value;
-              console.log({
-                passwordCurrent: passwordCurrent,
-                password: password,
-                passwordConfirm: passwordConfirm
-              });
-              _context.next = 8;
+              _context.next = 7;
               return (0, _login.updateSettings)({
                 passwordCurrent: passwordCurrent,
                 password: password,
                 passwordConfirm: passwordConfirm
               }, 'password');
 
-            case 8:
+            case 7:
               document.getElementById('password-current').value = '';
               document.getElementById('password').value = '';
               document.getElementById('password-confirm').value = '';
               document.querySelector('.btn-change-password').textContent = 'Save Password';
 
-            case 12:
+            case 11:
             case "end":
               return _context.stop();
           }
@@ -9430,7 +9426,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64833" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55488" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
